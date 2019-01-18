@@ -1,20 +1,27 @@
 module HistoryTest exposing (suite)
 
 import Expect exposing (Expectation)
+import History exposing (Problem(..), history, parse)
+import Message exposing (message)
 import Test exposing (..)
-import History exposing (parse, Problem(..))
+
 
 suite : Test
 suite =
     describe "History"
-        [ describe "parse" [
-               test "message" <|
-                   \_ ->
-                   let
-                       actual = parse "03/11/2016, 23:08 - Daan van Berkel: Wil jij volgende keer gewoon drinken geven als ik het vraag"
+        [ describe "parse"
+            [ test "message" <|
+                \_ ->
+                    let
+                        actual =
+                            parse "03/11/2016, 23:08 - Daan van Berkel: Test\n"
 
-                       expected = Err <| General "Implement me"
-                   in
-                       Expect.equal actual expected
-              ]
+                        msg =
+                            message "03/11/2016, 23:08" "Daan van Berkel" "Test"
+
+                        expected =
+                            Ok <| history [msg]
+                    in
+                    Expect.equal actual expected
+            ]
         ]
