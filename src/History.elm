@@ -1,6 +1,6 @@
 module History exposing (History, Problem(..), history, parse)
 
-import Message exposing (Message, Sender, Timestamp, message, timestamp, user)
+import Message exposing (Message, Sender, Timestamp, message, timestamp, user, system)
 import Parser exposing (..)
 
 
@@ -47,8 +47,6 @@ messageParser =
         |. dash
         |. space
         |= senderParser
-        |. colon
-        |. space
         |= contentParser
 
 
@@ -141,14 +139,36 @@ safeIntUnwrap option =
 
 senderParser : Parser Sender
 senderParser =
+    oneOf
+        [ userParser
+        , Parser.map (\_ -> system) <| succeed ()
+        ]
+
+userParser: Parser Sender
+userParser =
     let
         usernameParser =
             getChompedString <|
                 succeed ()
                     |. chompUntil ":"
+                    |. chompIf isColon
+                    |. chompIf isSpace
     in
     usernameParser
+        |> Parser.map (String.slice 0 -2)
         |> Parser.map user
+
+isA : Char -> Char -> Bool
+isA target character =
+    target == character
+
+isColon : Char -> Bool
+isColon =
+    isA ':'
+
+isSpace : Char -> Bool
+isSpace =
+    isA ' '
 
 
 contentParser : Parser String

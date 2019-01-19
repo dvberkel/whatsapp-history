@@ -1,4 +1,4 @@
-module Message exposing (Message, Sender, Timestamp, message, timestamp, user)
+module Message exposing (Message, Sender, Timestamp, message, timestamp, user, system)
 
 
 type Message
@@ -61,8 +61,13 @@ timestamp dayOfMonth monthOfYear year hour minutes =
 
 type Sender
     = User String
+    | System
 
 
 user : String -> Sender
 user username =
     User username
+
+system : Sender
+system =
+    System
