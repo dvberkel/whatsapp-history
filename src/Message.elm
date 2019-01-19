@@ -1,19 +1,19 @@
-module Message exposing (Message, Timestamp, message, timestamp)
+module Message exposing (Message, Sender, Timestamp, message, timestamp, user)
 
 
 type Message
     = Message
         { timestamp : Timestamp
-        , user : String
+        , sender : Sender
         , content : String
         }
 
 
-message : Timestamp -> String -> String -> Message
-message aTimestamp user content =
+message : Timestamp -> Sender -> String -> Message
+message aTimestamp aSender content =
     Message
         { timestamp = aTimestamp
-        , user = user
+        , sender = aSender
         , content = content
         }
 
@@ -57,3 +57,12 @@ timestamp dayOfMonth monthOfYear year hour minutes =
         , hour = hour
         , minutes = minutes
         }
+
+
+type Sender
+    = User String
+
+
+user : String -> Sender
+user username =
+    User username

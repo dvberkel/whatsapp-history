@@ -1,6 +1,6 @@
 module History exposing (History, Problem(..), history, parse)
 
-import Message exposing (Message, message, Timestamp, timestamp)
+import Message exposing (Message, Sender, Timestamp, message, timestamp, user)
 import Parser exposing (..)
 
 
@@ -46,7 +46,7 @@ messageParser =
         |. space
         |. dash
         |. space
-        |= userParser
+        |= senderParser
         |. colon
         |. space
         |= contentParser
@@ -70,6 +70,7 @@ colon =
 slash : Parser ()
 slash =
     symbol "/"
+
 
 comma : Parser ()
 comma =
@@ -138,11 +139,16 @@ safeIntUnwrap option =
             problem "can not unwrap Nothing into an Int"
 
 
-userParser : Parser String
-userParser =
-    getChompedString <|
-        succeed ()
-            |. chompUntil ":"
+senderParser : Parser Sender
+senderParser =
+    let
+        usernameParser =
+            getChompedString <|
+                succeed ()
+                    |. chompUntil ":"
+    in
+    usernameParser
+        |> Parser.map user
 
 
 contentParser : Parser String

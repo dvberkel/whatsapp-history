@@ -2,7 +2,7 @@ module HistoryTest exposing (suite)
 
 import Expect exposing (Expectation)
 import History exposing (Problem(..), history, parse)
-import Message exposing (message, timestamp)
+import Message exposing (message, timestamp, user)
 import Test exposing (..)
 
 
@@ -19,8 +19,11 @@ suite =
                         aTimestamp =
                             timestamp 3 11 2016 23 8
 
+                        aSender =
+                            user "Daan van Berkel"
+
                         msg =
-                            message aTimestamp "Daan van Berkel" "Test"
+                            message aTimestamp aSender "Test"
 
                         expected =
                             Ok <| history [ msg ]
