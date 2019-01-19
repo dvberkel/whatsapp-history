@@ -3,13 +3,13 @@ module Message exposing (Message, Timestamp, message, timestamp)
 
 type Message
     = Message
-        { timestamp : String
+        { timestamp : Timestamp
         , user : String
         , content : String
         }
 
 
-message : String -> String -> String -> Message
+message : Timestamp -> String -> String -> Message
 message aTimestamp user content =
     Message
         { timestamp = aTimestamp

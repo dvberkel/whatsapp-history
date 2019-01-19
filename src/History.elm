@@ -1,7 +1,7 @@
 module History exposing (History, Problem(..), history, parse)
 
-import Message exposing (Message, message)
-import Parser exposing ((|.), (|=), DeadEnd, Parser, Trailing(..), chompIf, chompUntil, getChompedString, run, sequence, succeed, symbol)
+import Message exposing (Message, message, Timestamp, timestamp)
+import Parser exposing (..)
 
 
 parse : String -> Result Problem History
@@ -42,7 +42,7 @@ historyParser =
 messageParser : Parser Message
 messageParser =
     succeed message
-        |= timestamp
+        |= timestampParser
         |. space
         |. dash
         |. space
@@ -67,52 +67,75 @@ colon =
     symbol ":"
 
 
-timestamp : Parser String
-timestamp =
-    getChompedString <|
-        succeed ()
-            |. chompIf Char.isDigit
-            |. chompIf Char.isDigit
-            |. chompIf isSlash
-            |. chompIf Char.isDigit
-            |. chompIf Char.isDigit
-            |. chompIf isSlash
-            |. chompIf Char.isDigit
-            |. chompIf Char.isDigit
-            |. chompIf Char.isDigit
-            |. chompIf Char.isDigit
-            |. chompIf isComma
-            |. chompIf isSpace
-            |. chompIf Char.isDigit
-            |. chompIf Char.isDigit
-            |. chompIf isColon
-            |. chompIf Char.isDigit
-            |. chompIf Char.isDigit
+slash : Parser ()
+slash =
+    symbol "/"
+
+comma : Parser ()
+comma =
+    symbol ","
 
 
-isA : Char -> Char -> Bool
-isA target character =
-    character == target
+timestampParser : Parser Timestamp
+timestampParser =
+    succeed timestamp
+        |= digits 2
+        |. slash
+        |= digits 2
+        |. slash
+        |= digits 4
+        |. comma
+        |. space
+        |= digits 2
+        |. colon
+        |= digits 2
 
 
-isSlash : Char -> Bool
-isSlash =
-    isA '/'
+digits : Int -> Parser Int
+digits n =
+    seq n Char.isDigit
+        |> Parser.map String.fromList
+        |> Parser.map String.toInt
+        |> Parser.andThen safeIntUnwrap
 
 
-isComma : Char -> Bool
-isComma =
-    isA ','
+seq : Int -> (Char -> Bool) -> Parser (List Char)
+seq n predicate =
+    accumulatedSeq [] n predicate
 
 
-isSpace : Char -> Bool
-isSpace =
-    isA ' '
+accumulatedSeq : List Char -> Int -> (Char -> Bool) -> Parser (List Char)
+accumulatedSeq accumulator n predicate =
+    if n == 0 then
+        succeed <| List.reverse accumulator
+
+    else
+        let
+            headParser =
+                getChompedString <|
+                    succeed ()
+                        |. chompIf predicate
+
+            tailParser input =
+                case String.uncons input of
+                    Just ( character, _ ) ->
+                        accumulatedSeq (character :: accumulator) (n - 1) predicate
+
+                    Nothing ->
+                        problem "expected a certain character, but did not see it"
+        in
+        headParser
+            |> Parser.andThen tailParser
 
 
-isColon : Char -> Bool
-isColon =
-    isA ':'
+safeIntUnwrap : Maybe Int -> Parser Int
+safeIntUnwrap option =
+    case option of
+        Just n ->
+            succeed n
+
+        Nothing ->
+            problem "can not unwrap Nothing into an Int"
 
 
 userParser : Parser String
