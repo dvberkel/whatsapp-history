@@ -1,4 +1,4 @@
-module Message exposing (Message, message)
+module Message exposing (Message, Timestamp, message, timestamp)
 
 
 type Message
@@ -10,9 +10,50 @@ type Message
 
 
 message : String -> String -> String -> Message
-message timestamp user content =
+message aTimestamp user content =
     Message
-        { timestamp = timestamp
+        { timestamp = aTimestamp
         , user = user
         , content = content
+        }
+
+
+type Timestamp
+    = Timestamp
+        { dayOfMonth : DayOfMonth
+        , monthOfYear : MonthOfYear
+        , year : Year
+        , hour : Hour
+        , minutes : Minutes
+        }
+
+
+type alias DayOfMonth =
+    Int
+
+
+type alias MonthOfYear =
+    Int
+
+
+type alias Year =
+    Int
+
+
+type alias Hour =
+    Int
+
+
+type alias Minutes =
+    Int
+
+
+timestamp : DayOfMonth -> MonthOfYear -> Year -> Hour -> Minutes -> Timestamp
+timestamp dayOfMonth monthOfYear year hour minutes =
+    Timestamp
+        { dayOfMonth = dayOfMonth
+        , monthOfYear = monthOfYear
+        , year = year
+        , hour = hour
+        , minutes = minutes
         }
